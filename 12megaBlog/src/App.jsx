@@ -1,17 +1,39 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
+import { useState, useEffect } from "react";
+import { useDispatch } from "react-redux";
+import authService from "./appwrite/auth";
+import { login, logout } from "./store/authSlice";
 import "./App.css";
+import { Footer, Header } from "./components";
+import {Outlet} from "react-router-dom"
 
 function App() {
-  console.log(import.meta.env.VITE_APPWRITE_URL);
-  const [count, setCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const dispatch = useDispatch();
 
-  return (
-    <>
-      <h1>A blog app with appwrite</h1>
-    </>
-  );
+  useEffect(() => {
+    authService
+      .getCurrentUser()
+      .then((userdata) => {
+        if (userdata) {
+          dispatch(login({ userdata }));
+        } else {
+          dispatch(logout());
+        }
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  return !loading ? (
+    <div className="min-h-screen flex flex-wrap content-between bg-gray-400">
+      <div className="w-full block">
+        <Header />
+        <main>
+           {/* <Outlet />  */} TODO
+        </main>
+        <Footer />
+      </div>
+    </div>
+  ) : null;
 }
 
 export default App;
